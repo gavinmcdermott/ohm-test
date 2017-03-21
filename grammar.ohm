@@ -1,0 +1,13 @@
+// This creates a single rule called Number which matches one or more digits.
+// The + means one or more, just like in a regular expression. This rule will match
+// if there is one digit or more than one digit. It won’t match if there are zero
+// digits or something something other than a digit. A digit is defined as the
+// characters for the numbers 0 to 9. digit is also a rule like Number is, but it’s
+// one of Ohm’s built in rules so we don’t have to define it ourselves. We could
+// override if it we wanted to but that wouldn’t make sense in this case. After all
+// we don’t plan to invent a new form of number (yet!)
+
+CoolNums {
+  // just a basic int
+  Number = digit+
+}
