@@ -1,3 +1,5 @@
+// https://www.pubnub.com/blog/2016-08-30-javascript-parser-ohm-makes-creating-a-programming-language-easy/
+
 // This creates a single rule called Number which matches one or more digits.
 // The + means one or more, just like in a regular expression. This rule will match
 // if there is one digit or more than one digit. It won’t match if there are zero
@@ -8,6 +10,10 @@
 // we don’t plan to invent a new form of number (yet!)
 
 CoolNums {
-  // just a basic int
-  Number = digit+
+  Number    = hex | float | int
+  int       = digit+
+  float     = digit+ "." digit+
+  hex       = "0x" hexDigit+
+  hexDigit  := "0".."9" | "a".."f" | "A".."F"
 }
+
