@@ -34,21 +34,26 @@ const sem = grammar.createSemantics().addOperation('toJS', {
     return parseInt(this.sourceString, 10)
   },
 
-  float(a, b, c) {
+  float(a, b, c, d) {
     console.log('recognizing floats', this.sourceString)
     return parseFloat(this.sourceString)
   },
 
+  oct(a, b) {
+    console.log('recognizing oct', this.sourceString, typeof this.sourceString)
+    return parseInt(this.sourceString.substring(2), 8)
+  },
+
   hex(a, b) {
     console.log('recognizing hex', this.sourceString)
-    return parseInt(this.sourceString, 16)
+    return parseInt(this.sourceString.substring(2), 16)
   }
 })
 
 const test = (input, answer) => {
   const match = grammar.match(input)
   if (match.failed()) {
-    return console.log(`input failed to match ${input} ${match.message}`)
+    return console.log(`FAILURE: input failed to match ${input} ${match.message}`)
   }
 
   const result = sem(match).toJS()
@@ -61,6 +66,9 @@ const test = (input, answer) => {
 test("123", 123)
 test("999", 999)
 
+test("1.4e3", 1.4e3)
+test("123.4e-3", 123.4e-3)
+
 test("1.2", 1.2)
 test("0.4", 0.4)
 test("123.456", 123.456)
@@ -68,5 +76,8 @@ test("123234.45", 123234.45)
 
 test("0x456", 0x456)
 test("0xFF", 255)
+
+test('0o77', 63)
+test('0o23', 0o23)
 
 test("abc", 999)

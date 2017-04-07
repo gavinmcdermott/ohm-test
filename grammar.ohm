@@ -9,11 +9,16 @@
 // override if it we wanted to but that wouldn’t make sense in this case. After all
 // we don’t plan to invent a new form of number (yet!)
 
+// The ? means zero or one, so exp is optional but there can’t be more than one.
+
 CoolNums {
-  Number    = hex | float | int
+  Number    = hex | oct | float | int
   int       = digit+
-  float     = digit+ "." digit+
+  float     = digit+ "." digit+ exp?
+  exp       = "e" "-"? digit+
   hex       = "0x" hexDigit+
   hexDigit  := "0".."9" | "a".."f" | "A".."F"
+  oct       = "0o" octDigit+
+  octDigit  = "0".."7"
 }
 
