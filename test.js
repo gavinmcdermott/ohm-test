@@ -5,6 +5,8 @@ const assert = require('assert')
 // The ohm.grammar call will read in the file and parse it into a grammar object.
 const grammar = ohm.grammar(fs.readFileSync('./grammar.ohm').toString())
 
+let semantics = grammar.createSemantics()
+
 // console.log(grammar)
 
 // Now we can add semantics.
@@ -17,8 +19,44 @@ const grammar = ohm.grammar(fs.readFileSync('./grammar.ohm').toString())
 // what to do with chunks once they’ve been parsed.
 
 
+// This class represents a number - returns itself when resolve is called
+// resolution being the key concept
+class MNumber {
+  constructor(val) { this.val = val }
+  resolve(scope) { return this }
+  jsEquals(jsval) { return this.val == jsval }
+}
+
+// BinOp accepts the operation and two values to perform the operation on
+// (operands). The resolve method will call resolve on the two
+// operands, pull out the underlying Javascript values, then return a new MNumber
+// by combining them into new values.
+// Note: We could skip calling resolve on the operands because resolve() on a
+// plain number just returns itself. However, I included the resolve call here
+// because later on the operand might not be a number. It might be a symbol or
+// function instead. Defining everything in terms of resolve keeps the code future-proof.
+class BinOp {
+  constructor(op, A, B) {
+    this.op = op
+    this.A = A
+    this.B = B
+  }
+  resolve(scope) {
+    const a = this.A.resolve(scope).val
+    const b = this.B.resolve(scope).val
+
+    if (this.op == 'add') return new MNumber(a+b)
+    if (this.op == 'sub') return new MNumber(a-b)
+    if (this.op == 'mul') return new MNumber(a*b)
+    if (this.op == 'div') return new MNumber(a/b)
+  }
+}
+
+
+
+
 // The semantic actions
-const Calculator = grammar.createSemantics().addOperation('calc', {
+const Calculator = semantics.addOperation('calc', {
   // The action for Number no longer does anything interesting.
   // It receives the child node ‘a’ and returns the result of toJS on the child.
   // In other words the Number rule simply returns whatever its child rule matched.
@@ -71,16 +109,36 @@ const Calculator = grammar.createSemantics().addOperation('calc', {
   }
 })
 
+const ASTBuilder = semantics.addOperation('toAST', {
+  AddExpr_plus(a, _, b) { return new BinOp('add', a.toAST(), b.toAST()) },
+  AddExpr_minus(a, _, b) { return new BinOp('sub', a.toAST(), b.toAST()) },
+  MulExpr_times(a, _, b) { return new BinOp('mul', a.toAST(), b.toAST()) },
+  MulExpr_divide(a, _, b) { return new BinOp('div', a.toAST(), b.toAST()) },
+  PriExpr_paren(_, a, __) { return a.toAST() },
+
+  Number(a) { return new MNumber(a.calc()) }
+})
+
+
+
+
+
+
+
+
+
 const test = (input, answer) => {
   const match = grammar.match(input)
   if (match.failed()) {
     return console.log(`FAILURE: input failed to match ${input} ${match.message}`)
   }
 
-  const result = Calculator(match).calc()
+  const ast = ASTBuilder(match).toAST()
+  const result = ast.resolve()
+  console.log(`result = ${result}`)
 
-  assert.deepEqual(result, answer)
-  console.log(`success = ${result} ${answer}`)
+  assert.deepEqual(result.jsEquals(answer), true)
+  console.log(`success = ${answer}`)
   console.log('-------------------------\n')
 }
 
@@ -102,6 +160,8 @@ test('0o77', 63)
 test('0o23', 0o23)
 
 test("4+3", 7)
+// test("7-3", 4)
+test("7*3", 21)
 
 test("abc", 999)
 
