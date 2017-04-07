@@ -1,4 +1,5 @@
-// https://www.pubnub.com/blog/2016-08-30-javascript-parser-ohm-makes-creating-a-programming-language-easy/
+// 1) https://www.pubnub.com/blog/2016-08-30-javascript-parser-ohm-makes-creating-a-programming-language-easy/
+// 2) https://www.pubnub.com/blog/2016-09-08-build-your-own-symbol-calculator-with-ohm/
 
 // This creates a single rule called Number which matches one or more digits.
 // The + means one or more, just like in a regular expression. This rule will match
@@ -15,7 +16,7 @@
 
 TestLang {
   Expr
-    = AddExpr
+    = Assign | AddExpr | Identifier | Number
 
   AddExpr
     = AddExpr "+" MulExpr -- plus
@@ -29,14 +30,19 @@ TestLang {
 
   PriExpr
     = "(" Expr ")" -- paren
+    | Identifier
     | Number
+
+  // Assign is an identifier and an expression separated by the "=" character
+  Assign = Identifier "=" Expr
+  Identifier = letter (letter|digit)*
 
   Number    = hex | oct | float | int
   int       = digit+
   float     = digit+ "." digit+ exp?
   exp       = "e" "-"? digit+
   hex       = "0x" hexDigit+
-  hexDigit  := "0".."9" | "a".."f" | "A".."F"
+  // hexDigit  := "0".."9" | "a".."f" | "A".."F" // already defined by Ohm
   oct       = "0o" octDigit+
   octDigit  = "0".."7"
 }

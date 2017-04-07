@@ -1,3 +1,5 @@
+'use strict'
+
 const ohm = require('ohm-js')
 const fs = require('fs')
 const assert = require('assert')
@@ -5,9 +7,12 @@ const assert = require('assert')
 // The ohm.grammar call will read in the file and parse it into a grammar object.
 const grammar = ohm.grammar(fs.readFileSync('./grammar.ohm').toString())
 
-let semantics = grammar.createSemantics()
+// Instead we delegate to the existing calc operation.
 
-// console.log(grammar)
+// This delegation system is a key part of Ohm’s design. You can have multiple
+// semantic operations which call each other, as long as they are in the same
+// set of semantics
+let semantics = grammar.createSemantics()
 
 // Now we can add semantics.
 
@@ -26,6 +31,51 @@ class MNumber {
   resolve(scope) { return this }
   jsEquals(jsval) { return this.val == jsval }
 }
+
+class MSymbol {
+  constructor(name) {
+    this.name = name
+  }
+  resolve(scope) {
+    console.log('=> in MSymbol', scope)
+    return scope.getSymbol(this.name)
+  }
+}
+
+
+
+// Now we need a place to actually sort what the symbols point to. This is called a scope.
+// For now we will have only one scope called GLOBAL, but in the future we will have more.
+class Scope {
+  constructor() {
+    console.log('=> making new Scope')
+    this.storage = {}
+  }
+  setSymbol(sym, obj) {
+    console.log('=> in Scope.set', sym, obj)
+    this.storage[sym.name] = obj
+    return this.storage[sym.name]
+  }
+  getSymbol(name) {
+    console.log('=> in Scope.get', name)
+    if (this.storage[name]) return this.storage[name]
+    return null
+  }
+}
+
+// Now we can create the Assignment operator which actually sets the symbol’s value.
+class Assignment {
+  constructor(sym, val) {
+    this.symbol = sym
+    this.val = val
+  }
+  resolve(scope) {
+    // return scope.setSymbol(this.symbol, this.val)
+    console.log('=> in assignment', scope)
+    return scope.setSymbol(this.symbol, this.val.resolve(scope))
+  }
+}
+
 
 // BinOp accepts the operation and two values to perform the operation on
 // (operands). The resolve method will call resolve on the two
@@ -116,6 +166,19 @@ const ASTBuilder = semantics.addOperation('toAST', {
   MulExpr_divide(a, _, b) { return new BinOp('div', a.toAST(), b.toAST()) },
   PriExpr_paren(_, a, __) { return a.toAST() },
 
+  Assign(a, _, b) {
+    console.log('recognizing Assign', this.sourceString)
+    let foo = new Assignment(a.toAST(), b.toAST())
+    console.log(foo)
+    return foo
+  },
+  Identifier(a, b) {
+    console.log('recognizing Identifier', this.sourceString)
+    let foo = new MSymbol(this.sourceString, null)
+    console.log(foo)
+    return foo
+  },
+
   Number(a) { return new MNumber(a.calc()) }
 })
 
@@ -125,7 +188,7 @@ const ASTBuilder = semantics.addOperation('toAST', {
 
 
 
-
+const GLOBAL = new Scope(null)
 
 const test = (input, answer) => {
   const match = grammar.match(input)
@@ -134,7 +197,7 @@ const test = (input, answer) => {
   }
 
   const ast = ASTBuilder(match).toAST()
-  const result = ast.resolve()
+  const result = ast.resolve(GLOBAL)
   console.log(`result = ${result}`)
 
   assert.deepEqual(result.jsEquals(answer), true)
@@ -160,15 +223,18 @@ test('0o77', 63)
 test('0o23', 0o23)
 
 test("4+3", 7)
-// test("7-3", 4)
+test("7-3", 4)
 test("7*3", 21)
 
+
+// Tests to work with the new symbol syntax
+test('x = 10', 10)
+test('x', 10)
+test('x * 2', 20)
+test('x * 0x2', 20)
+
+
 test("abc", 999)
-
-
-
-
-
 
 
 
