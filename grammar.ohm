@@ -11,7 +11,26 @@
 
 // The ? means zero or one, so exp is optional but there can’t be more than one.
 
+// Order matters. Try moving the Expr below the Number def'n...
+
 CoolNums {
+  Expr
+    = AddExpr
+
+  AddExpr
+    = AddExpr "+" MulExpr -- plus
+    | AddExpr "-" MulExpr -- minus
+    | MulExpr
+
+  MulExpr
+    = MulExpr "*" PriExpr -- times
+    | MulExpr "/" PriExpr -- divide
+    | PriExpr
+
+  PriExpr
+    = "(" Expr ")" -- paren
+    | Number
+
   Number    = hex | oct | float | int
   int       = digit+
   float     = digit+ "." digit+ exp?
@@ -21,4 +40,3 @@ CoolNums {
   oct       = "0o" octDigit+
   octDigit  = "0".."7"
 }
-

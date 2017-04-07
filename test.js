@@ -18,15 +18,36 @@ const grammar = ohm.grammar(fs.readFileSync('./grammar.ohm').toString())
 
 
 // The semantic actions
-const sem = grammar.createSemantics().addOperation('toJS', {
+const Calculator = grammar.createSemantics().addOperation('calc', {
   // The action for Number no longer does anything interesting.
   // It receives the child node ‘a’ and returns the result of toJS on the child.
   // In other words the Number rule simply returns whatever its child rule matched.
   // Since this is the default behavior of any rule in Ohm we can actually just
-  // leave the Number action out. Ohm will do it for us
-  Number(a) {
-    console.log('recognizing general number', this.sourceString)
-    return a.toJS()
+  // leave the Number action out. Ohm will do it for us...
+
+  // Number(a) {
+  //   console.log('recognizing general number', this.sourceString)
+  //   return a.calc()
+  // },
+
+  AddExpr(a) {
+    console.log('recognizing add', this.sourceString)
+    return a.calc()
+  },
+
+  AddExpr_plus(a,_,b) {
+    console.log('doing add', this.sourceString)
+    return a.calc() + b.calc()
+  },
+
+  MulExpr(a) {
+    console.log('recognizing mul', this.sourceString)
+    return a.calc()
+  },
+
+  MulExpr_times(a,_,b) {
+    console.log('doing mul', this.sourceString)
+    return a.calc() * b.calc()
   },
 
   int(a) {
@@ -40,7 +61,7 @@ const sem = grammar.createSemantics().addOperation('toJS', {
   },
 
   oct(a, b) {
-    console.log('recognizing oct', this.sourceString, typeof this.sourceString)
+    console.log('recognizing oct', this.sourceString)
     return parseInt(this.sourceString.substring(2), 8)
   },
 
@@ -56,7 +77,7 @@ const test = (input, answer) => {
     return console.log(`FAILURE: input failed to match ${input} ${match.message}`)
   }
 
-  const result = sem(match).toJS()
+  const result = Calculator(match).calc()
 
   assert.deepEqual(result, answer)
   console.log(`success = ${result} ${answer}`)
@@ -80,4 +101,15 @@ test("0xFF", 255)
 test('0o77', 63)
 test('0o23', 0o23)
 
+test("4+3", 7)
+
 test("abc", 999)
+
+
+
+
+
+
+
+
+
