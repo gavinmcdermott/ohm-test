@@ -61,9 +61,11 @@ test('x * 0x2', 20)
 
 
 test('4==4', true)
+test('4!=4', false)
+test('4!=5', true)
 
 
-test("abc", 999)
+// test("abc", 999)
 
 
 

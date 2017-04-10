@@ -17,13 +17,18 @@
 TestLang {
   Expr = Assign | MathOp | Term
 
-  MathOp = Mul | Div | Add | Sub | Eq
+  MathOp = Mul | Div | Add | Sub | Eq | Neq | Lt | Lte | Gt | Gte
 
-  Eq = Expr "==" Term
   Mul = Expr "*" Term
   Div = Expr "/" Term
   Add = Expr "+" Term
   Sub = Expr "-" Term
+  Eq = Expr "==" Term
+  Neq = Expr "!=" Term
+  Lt = Expr "<" Term
+  Lte = Expr "<=" Term
+  Gt = Expr ">" Term
+  Gte = Expr ">=" Term
 
   Group = "(" Expr ")"
 

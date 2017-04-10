@@ -73,7 +73,9 @@ class BinOp {
     if (this.op == 'sub') return new MNumber(a - b)
     if (this.op == 'mul') return new MNumber(a * b)
     if (this.op == 'div') return new MNumber(a / b)
+
     if (this.op == 'eq') return new MNumber(a == b)
+    if (this.op == 'neq') return new MNumber(a != b)
   }
 }
 
