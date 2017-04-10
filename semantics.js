@@ -79,12 +79,23 @@ module.exports.make = (semantics) => {
   })
 
   const ASTBuilder = semantics.addOperation('toAST', {
+    Block(_, body, __) {
+      // console.log(Object.keys(body))
+      // console.log('\n===========================\n')
+      // console.log(body)
+      return new AST.Block(body.toAST())
+    },
+
     Add(a, _, b) { return new AST.BinOp('add', a.toAST(), b.toAST()) },
     Sub(a, _, b) { return new AST.BinOp('sub', a.toAST(), b.toAST()) },
     Mul(a, _, b) { return new AST.BinOp('mul', a.toAST(), b.toAST()) },
     Div(a, _, b) { return new AST.BinOp('div', a.toAST(), b.toAST()) },
     Eq(a, _, b) { return new AST.BinOp('eq', a.toAST(), b.toAST()) },
     Neq(a, _, b) { return new AST.BinOp('neq', a.toAST(), b.toAST()) },
+    Lt(a, _, b) { return new AST.BinOp('lt', a.toAST(), b.toAST()) },
+    Lte(a, _, b) { return new AST.BinOp('lte', a.toAST(), b.toAST()) },
+    Gt(a, _, b) { return new AST.BinOp('gt', a.toAST(), b.toAST()) },
+    Gte(a, _, b) { return new AST.BinOp('gte', a.toAST(), b.toAST()) },
 
     Group(_, a, __) { return a.toAST() },
 

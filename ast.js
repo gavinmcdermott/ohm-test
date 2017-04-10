@@ -76,9 +76,33 @@ class BinOp {
 
     if (this.op == 'eq') return new MNumber(a == b)
     if (this.op == 'neq') return new MNumber(a != b)
+
+    if (this.op == 'lt') return new MNumber(a < b)
+    if (this.op == 'lte') return new MNumber(a <= b)
+    if (this.op == 'gt') return new MNumber(a > b)
+    if (this.op == 'gte') return new MNumber(a >= b)
   }
 }
 
+
+// A Block is a sequence of expressions or statements which are evaluated in order,
+// and then returns the value of the final expression. The Block: When resolve is
+// called it resolves all of the statements and returns the value of the last one.
+class Block {
+  constructor(block) {
+    console.log('-------------------------')
+    console.log(block)
+    console.log('-------------------------')
+    this.statements = block
+  }
+  resolve(scope) {
+    console.log('-------------------------')
+    console.log(this.statements.map)
+    console.log('-------------------------')
+    const vals = this.statements.map(expr => expr.resolve(scope))
+    return vals.pop()
+  }
+}
 
 
 module.exports = {
@@ -87,4 +111,5 @@ module.exports = {
   BinOp,
   Assignment,
   Scope,
+  Block,
 }

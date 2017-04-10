@@ -15,7 +15,7 @@
 // Order matters. Try moving the Expr below the Number def'n...
 
 TestLang {
-  Expr = Assign | MathOp | Term
+  Expr = Block | Assign | MathOp | Term
 
   MathOp = Mul | Div | Add | Sub | Eq | Neq | Lt | Lte | Gt | Gte
 
@@ -31,6 +31,8 @@ TestLang {
   Gte = Expr ">=" Term
 
   Group = "(" Expr ")"
+
+  Block = "{" Expr* "}"
 
   Term = Group | identifier | Number
 

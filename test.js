@@ -24,7 +24,7 @@ const test = (input, answer) => {
 
   const ast = ASTBuilder(match).toAST()
   const result = ast.resolve(GLOBAL)
-  console.log(`result = ${result}`)
+  console.log(`result = ${result.val}`)
 
   assert.deepEqual(result.jsEquals(answer), true)
   console.log(`success = ${answer}`)
@@ -60,9 +60,26 @@ test('x * 2', 20)
 test('x * 0x2', 20)
 
 
-test('4==4', true)
-test('4!=4', false)
-test('4!=5', true)
+test('4 == 4', true)
+test('4 != 4', false)
+test('4 != 5', true)
+
+
+test('4 < 4', false)
+test('4 < 5', true)
+test('4 <= 5', true)
+test('4 > 4', false)
+test('41 > 5', true)
+test('41 >= 5', true)
+
+
+test('{ 4 + 5 }', 9)
+
+test(`{
+  x=4*5
+  y=x+6
+  y-3
+}`, 23)
 
 
 // test("abc", 999)
