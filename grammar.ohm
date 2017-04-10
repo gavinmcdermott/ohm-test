@@ -15,27 +15,24 @@
 // Order matters. Try moving the Expr below the Number def'n...
 
 TestLang {
-  Expr
-    = Assign | AddExpr | Identifier | Number
+  Expr = Assign | MathOp | Term
 
-  AddExpr
-    = AddExpr "+" MulExpr -- plus
-    | AddExpr "-" MulExpr -- minus
-    | MulExpr
+  MathOp = Mul | Div | Add | Sub | Eq
 
-  MulExpr
-    = MulExpr "*" PriExpr -- times
-    | MulExpr "/" PriExpr -- divide
-    | PriExpr
+  Eq = Expr "==" Term
+  Mul = Expr "*" Term
+  Div = Expr "/" Term
+  Add = Expr "+" Term
+  Sub = Expr "-" Term
 
-  PriExpr
-    = "(" Expr ")" -- paren
-    | Identifier
-    | Number
+  Group = "(" Expr ")"
+
+  Term = Group | identifier | Number
 
   // Assign is an identifier and an expression separated by the "=" character
-  Assign = Identifier "=" Expr
-  Identifier = letter (letter|digit)*
+  Assign = identifier "=" Expr
+
+  identifier = letter (letter|digit)*
 
   Number    = hex | oct | float | int
   int       = digit+
